@@ -18,6 +18,27 @@ public class Grid : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private Color gridGizmosColor;
 
+    private void Draw(Action<Vector3, Vector3> drawLine)
+    {
+        int horLinesCount = yCellsCount + 1;
+        int vertLinesCount = xCellsCount + 1;
+        
+        Vector3 horLinesOffset = Vector3.up * yCellSize;
+        Vector3 vertLinesOffset = Vector3.right * xCellSize;
+        
+        Vector3 horLinesTo =  vertLinesOffset * xCellsCount;
+        Vector3 vertLinesTo =  horLinesOffset * yCellsCount;
+        
+        Vector3 xPivotOffset = horLinesTo * -xPivot;
+        Vector3 yPivotOffset = vertLinesTo * -yPivot;
+        Vector3 pivotOffset = xPivotOffset + yPivotOffset;
+        
+        DrawParallelLines(horLinesCount, pivotOffset, horLinesTo + pivotOffset,
+            horLinesOffset, drawLine);
+        DrawParallelLines(vertLinesCount, pivotOffset, vertLinesTo + pivotOffset,
+            vertLinesOffset, drawLine);
+    }
+
     private static void DrawParallelLines(int count, Vector3 from, Vector3 to, Vector3 offset, Action<Vector3, Vector3> draw)
     {
         for (int i = 0; i < count; ++i)
@@ -33,24 +54,7 @@ public class Grid : MonoBehaviour
     {
         Gizmos.matrix = transform.localToWorldMatrix;
         Gizmos.color = gridGizmosColor;
-
-        int horLinesCount = yCellsCount + 1;
-        int vertLinesCount = xCellsCount + 1;
-        
-        Vector3 horLinesOffset = Vector3.up * yCellSize;
-        Vector3 vertLinesOffset = Vector3.right * xCellSize;
-        
-        Vector3 horLinesTo =  vertLinesOffset * xCellsCount;
-        Vector3 vertLinesTo =  horLinesOffset * yCellsCount;
-        
-        Vector3 xPivotOffset = horLinesTo * -xPivot;
-        Vector3 yPivotOffset = vertLinesTo * -yPivot;
-        Vector3 pivotOffset = xPivotOffset + yPivotOffset;
-        
-        DrawParallelLines(horLinesCount, pivotOffset, horLinesTo + pivotOffset,
-            horLinesOffset, Gizmos.DrawLine);
-        DrawParallelLines(vertLinesCount, pivotOffset, vertLinesTo + pivotOffset,
-            vertLinesOffset, Gizmos.DrawLine);
+        Draw(Gizmos.DrawLine);
     }
 #endif
 }
