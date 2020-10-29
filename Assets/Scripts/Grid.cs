@@ -19,26 +19,28 @@ public class Grid : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private Color gridGizmosColor;
 
-    private Plane _plane = new Plane(Vector3.forward, Vector3.zero);
+    private Plane _localPlane = new Plane(Vector3.forward, Vector3.zero);
 
     public float XCellSize => xCellSize;
     public float YCellSize => yCellSize;
+    
+    private Plane WorldPlane => new Plane(transform.forward, transform.position);
 
-    public bool Raycast(Ray ray, out Vector3 closestCellCenter)
+    public bool RaycastClosestCellCenter(Ray worldRay, out Vector3 center)
     {
-        closestCellCenter = Vector3.zero;
-        
-        if (!_plane.Raycast(ray, out float enter))
+        center = Vector3.zero;
+
+        if (!WorldPlane.Raycast(worldRay, out float enter))
             return false;
 
-        closestCellCenter = ClosestCellCenter(ray.GetPoint(enter));
+        center = GetClosestCellCenter(worldRay.GetPoint(enter));
         return true;
     }
-    
-    public Vector3 ClosestCellCenter(Vector3 point)
-    {
-        Vector3 projection = _plane.ClosestPointOnPlane(transform.TransformPoint(point));
 
+    public Vector3 GetClosestCellCenter(Vector3 worldPoint)
+    {
+        Vector3 projection = _localPlane.ClosestPointOnPlane(transform.InverseTransformPoint(worldPoint));
+        
         Vector3 xLinesOffset = Vector3.up * yCellSize;
         Vector3 yLinesOffset = Vector3.right * xCellSize;
         
@@ -47,18 +49,17 @@ public class Grid : MonoBehaviour
         
         Vector3 xPivotOffset = xLinesTo * -xPivot;
         Vector3 yPivotOffset = yLinesTo * -yPivot;
-        Vector3 pivotOffset = xPivotOffset + yPivotOffset;
+        Vector3 pivot = xPivotOffset + yPivotOffset;
 
-        int xLeftCell = (int) (pivotOffset.x / xCellSize);
-        int xRightCell = (int) (xLinesTo.x + pivotOffset.x / xCellSize);
-        
-        int yLeftCell = (int) (pivotOffset.y / yCellSize);
-        int yRightCell = (int) (yLinesTo.y + pivotOffset.y / yCellSize);
+        Vector3 pivotToProjection = projection - pivot;
 
-        int xCell = (int) Mathf.Clamp(projection.x / xCellSize, xLeftCell, xRightCell);
-        int yCell = (int) Mathf.Clamp(projection.y / yCellSize, yLeftCell, yRightCell);
+        int xCellNumber = (int) Mathf.Clamp(pivotToProjection.x / xCellSize, 0, xCellsCount - 1);
+        int yCellNumber = (int) Mathf.Clamp(pivotToProjection.y / yCellSize, 0, yCellsCount - 1);
 
-        return transform.InverseTransformPoint(new Vector3(xCell * xCellSize, yCell * yCellSize, 0));
+        float x = (float) (xCellNumber + 0.5) * xCellSize;
+        float y = (float) (yCellNumber + 0.5) * yCellSize;
+
+        return transform.TransformPoint(pivot + new Vector3(x, y, 0));
     }
 
     private void Draw(Action<Vector3, Vector3> drawLine)
@@ -74,11 +75,11 @@ public class Grid : MonoBehaviour
         
         Vector3 xPivotOffset = xLinesTo * -xPivot;
         Vector3 yPivotOffset = yLinesTo * -yPivot;
-        Vector3 pivotOffset = xPivotOffset + yPivotOffset;
+        Vector3 pivot = xPivotOffset + yPivotOffset;
         
-        DrawParallelLines(xLinesCount, pivotOffset, xLinesTo + pivotOffset,
+        DrawParallelLines(xLinesCount, pivot, xLinesTo + pivot,
             xLinesOffset, drawLine);
-        DrawParallelLines(yLinesCount, pivotOffset, yLinesTo + pivotOffset,
+        DrawParallelLines(yLinesCount, pivot, yLinesTo + pivot,
             yLinesOffset, drawLine);
     }
 
@@ -93,7 +94,7 @@ public class Grid : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.matrix = transform.localToWorldMatrix;
         Gizmos.color = gridGizmosColor;

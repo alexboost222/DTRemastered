@@ -5,36 +5,35 @@ public class TilePlacer : MonoBehaviour
 {
     [SerializeField] private Grid grid;
     [SerializeField] private Camera gameModeCamera;
-    [SerializeField] private Color gizmosColor;
 
-    private Vector3? _closestGridCenter;
+    private Vector3? _closestCellPoint;
 
     private void Update()
     {
         if(grid == null)
             return;
-
-        Camera raycastCamera = Application.isPlaying ? gameModeCamera : Camera.current;
         
-        if(raycastCamera == null)
+        if(gameModeCamera == null)
             return;
         
-        Ray cameraRay = raycastCamera.ScreenPointToRay(Input.mousePosition);
-        if (grid.Raycast(cameraRay, out Vector3 closestGridCenter))
-            _closestGridCenter = closestGridCenter;
+        Ray cameraRay = gameModeCamera.ScreenPointToRay(Input.mousePosition);
+        if (grid.RaycastClosestCellCenter(cameraRay, out Vector3 enter))
+            _closestCellPoint = enter;
         else
-            _closestGridCenter = null;
+            _closestCellPoint = null;
     }
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (_closestGridCenter == null)
+        if(_closestCellPoint == null)
             return;
-        
-        Gizmos.color = gizmosColor;
+            
         Gizmos.matrix = grid.transform.localToWorldMatrix;
-        Vector3 center = grid.transform.TransformPoint(_closestGridCenter.Value);
+        Vector3 center = grid.transform.InverseTransformPoint(_closestCellPoint.Value);
+        Gizmos.color = Color.red;
+        
+        Gizmos.DrawSphere(center, 0.1f);
         
         Vector3 from = center - new Vector3(grid.XCellSize / 2, grid.YCellSize / 2);
         Vector3 to = center + new Vector3(grid.XCellSize / 2, grid.YCellSize / 2);
