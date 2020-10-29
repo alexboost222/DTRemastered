@@ -62,7 +62,7 @@ public class Grid : MonoBehaviour
         return transform.TransformPoint(pivot + new Vector3(x, y, 0));
     }
 
-    private void Draw(Action<Vector3, Vector3> drawLine)
+    protected void Draw(Action<Vector3, Vector3> drawLine)
     {
         int xLinesCount = yCellsCount + 1;
         int yLinesCount = xCellsCount + 1;

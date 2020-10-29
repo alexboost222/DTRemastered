@@ -26,7 +26,7 @@ public class TilePlacer : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if(_closestCellPoint == null)
+        if(_closestCellPoint == null || grid == null)
             return;
             
         Gizmos.matrix = grid.transform.localToWorldMatrix;

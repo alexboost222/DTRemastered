@@ -147,16 +147,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 39772369}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d0aa51e12219cd4ca841df31a3cf2bc, type: 3}
+  m_Script: {fileID: 11500000, guid: ef9ca13c654a46f4f8e5a9ddf3f8025c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   xCellSize: 1
   yCellSize: 1
-  xCellsCount: 3
-  yCellsCount: 3
+  xCellsCount: 4
+  yCellsCount: 4
   xPivot: 0.5
   yPivot: 0.5
-  gridGizmosColor: {r: 0, g: 0.3962264, b: 0.023307458, a: 1}
+  gridGizmosColor: {r: 0.11399722, g: 1, b: 0, a: 1}
+  lineWidth: 0.05
+  material: {fileID: 2100000, guid: 9ac809f4e61f3c84f8467e1b1c6935da, type: 2}
 --- !u!4 &39772373
 Transform:
   m_ObjectHideFlags: 0
